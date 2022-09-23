@@ -1,0 +1,9 @@
+Docker Registry
+	escrito em python e depois mudado para go
+	gerencia imagens no dockerhub
+	docker tag <usuario_dockerhub>/<image_id> #copiar imagem 
+	#docker build -t (t é de tag)
+	docker login docker.io #entrar no dockerhub
+	docker push <usuario_dockerhub>/<image_id>
+	docker pull <usuario_dockerhub>/<image_id>:<versao>
+	para fazer seu registry veja aula: Criando Registry Privado

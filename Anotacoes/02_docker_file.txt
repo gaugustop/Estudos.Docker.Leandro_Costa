@@ -1,0 +1,16 @@
+Dockerfile
+	texto plano (sem extensão)
+	instrucoes de como construir uma imagem
+	>>> docker build #cria uma imagem a partir de um Dockerfile
+	Se colocar o Dockerfile em um diretório com vários arquivos
+	todos serão incluidos no processo de build!!!
+	FROM <imagem_base:versao>
+	MAINTAINER <e-mail do dono>
+	RUN <comando> #cada RUN cria uma nova camanda na imagem (commit)
+	CMD ["echo","Hello World"]
+	docker build -t helloworld:0.1 .
+	docker history helloworld:0.1
+	docker run helloworld:0.1
+	docker ps -a
+
+

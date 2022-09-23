@@ -1,0 +1,127 @@
+instalação
+   sudo su
+   apt-get update
+   apt-get install -y docker.io
+   service docker.io status
+   docker -v
+   docker version
+   docker info
+
+permissoes: acrescer o usuario ao grupo docker
+   sudo gpasswd -a usuario docker
+
+inicializar o container modo interativo
+   docker run -it ubuntu /bin/bash
+   docker run -it centos /bin/bash
+
+comunicacao atraves de rede
+   dockerd : inicializar o docker daemon
+   dockerd -h ip:porta : especifica o host
+   export DOCKER_HOST="ip:porta" : no client
+
+o que fazer dentro do container
+   ping 8.8.8.8 :pinga o google
+   ps -elf :vê os processos
+   cat etc/hosts
+   ip a :vê o ip
+
+listar containers criados
+   docker ps -a
+
+inicializar container
+   docker start CONTAINER_ID
+
+vincular ao container (entrar nele)
+   docker attach CONTAINER_ID
+
+sair do container sem interromper
+   CTRL + P + Q
+
+baixar todas versoes de uma imagem
+   docker pull -a NOMEDAIMAGEM
+   docker pull -a ubuntu (exemplo)
+
+ver as imagens disponiveis
+   docker images
+   docker images NOMEDAIMAGEM
+
+remover imagens
+	docker rmi <image_id>
+
+armazenamento das imagens
+   /var/lib/docker/overlay2
+
+docker daemon === runtime === engine
+
+ver processos que o container está executando
+   docker top CONTAINER_ID
+
+Camadas das imagens
+   Docker usa Union Mounts e AWFS para administrar as camadas dos containers
+   As camadas ficam em /var/lib/docker/overlay2/
+   o que foi acresentado em cada camada fica em /var/lib/docker/overlay2/9273974293dshf/diff
+   Fina camada de escrita (uma por container) que pode ser commitada na imagem.
+
+Copiar imagens
+   docker run ubuntu /bin/bash -c "echo 'Nice content' > /tmp/nice-content" #abrir o container e fazer algo
+   docker commit CONTAINER_ID foo-bar #salvar a imagem com sua alteração com nome foo-bar
+   docker history foo-bar #ver a historia de foo-bar
+   docker save -o /mnt/Shared/foo-bar.tar foo-bar #salvar a imagem em /mnt/Shared/foo-bar.tar
+   tar -tf /mnt/Shared/foo-bar.tar #extrair o container em outra maquina
+   docker load -i /mnt/Shared/foo-bar.tar #importa a imagem
+   docker run -it foo-bar /bin/bash #instancia um container da imagem
+   cat /tmp/nice-content #ve a alteracao que foi feita na imagem
+   
+docker run <opcao1> <IMAGEM> <PID1> <opcao2> <argumentos_opcao2>
+   -it #interativo
+   -d #detachado
+   --cpu-shares=256
+   memory=1g
+   -c <comando>
+
+Ver o que está acontecendo no container, o CONTAINER_ID pode ser subtituido pelo NAME
+   docker ps #mostra containers em execução
+   docker ps -a #mostra todos os containers já executados
+   docker inspect CONTAINER_ID #varias informações
+   docker logs CONTAINER_ID #logs
+   docker attach CONTAINER_ID #entra nele   
+
+Iniciando e parando um container (start, stops, restart)
+   exit #sair interrompendo
+   CRTL + P + Q  #sai sem interromper
+   docker stop CONTAINER_ID #interrompe a execução do container
+   docker kill -s <SIGNAL> #mais bruto, SIGNAL=?
+   docker start #inicia um container (detachado)
+   docker attach #entra num container em execução
+   docker restart #reinicia um container em execução
+
+No linux o PID 1 é o init, quando o init é morto, ele gerencia a morte de todos os outros processos.
+Nos containers, o PID 1 não é o init, o usuário define isso no run
+e tem sido o /bin/bash nos processos que vimos até agora.
+
+Deletando containers
+   Os containers ficam em /var/lib/docker/containers
+   docker stop CONTAINER_ID
+   docker rm CONTAINER_ID #só funciona em containers não executando
+
+mais de um processo por container
+   phusion/baseimage-docker #github
+
+docker inspect CONTAINER_ID
+   fica em /var/lib/docker/containers/f39827398f9fds/config.v2.json
+
+acessando o SHELL de um container
+   docker attach entra no PID 1 do container, que pode não ser o SHELL
+   ssh não é recomendado
+   nsenter #Namespaces Enter
+   docker inspect CONTAINER_ID | grep Pid #pega o <Pid>
+   nsenter -m -u -n -p -i -t <Pid> /bin/bash
+      -m #mount namespace
+      -u #UTS namespace
+      -n #network namespace
+      -p #process namespace
+      -i #ip
+      -t #target ao <Pid> do processo no host
+   docker exec -it CONTAINER_ID /bin/bash #funciona igual ao nsenter
+   aqui, exit não mata o processo do container, é outro fluxo.
+
